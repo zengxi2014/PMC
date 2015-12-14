@@ -3,7 +3,7 @@ package scut.zengxi.Clustering;
 /**
  * Created by zengxi on 2015/12/1.
  *
- * 簇类对象
+ * 簇类对象.
  */
 import java.util.ArrayList;
 import java.util.List;
