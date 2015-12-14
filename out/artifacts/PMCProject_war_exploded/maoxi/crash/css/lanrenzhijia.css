@@ -1,0 +1,114 @@
+/* css 重置 */
+/* 代码整理：懒人之家 lanrenzhijia.com */
+* {
+	margin:0;
+	padding:0;
+	list-style:none;
+}
+body {
+	background:#fff;
+	font:normal 12px/22px 宋体;
+}
+img {
+	border:0;
+}
+a {
+	text-decoration:none;
+	color:#333;
+}
+a:hover {
+	color:#1974A1;
+}
+/* 代码整理：懒人之家 lanrenzhijia.com */
+/* 本例子css */.hp-tab-newprd {
+	width:980px;
+	height: 460px;
+	margin:0 auto;
+	overflow: hidden;
+	position: relative;
+	background: #e8e8e8 
+}
+.hp-tab-newprd .j-sw-nav {
+	padding-top: 1px;
+	width: 860px;
+	height: 40px;
+	margin: 0 auto;
+	overflow: hidden;
+	position: relative
+}
+.hp-tab-newprd .j-sw-nav li {
+	float: left;
+	margin-right: -20px
+}
+.hp-tab-newprd .j-sw-nav li a {
+	position: relative;
+	display: block;
+	width: 100px;
+	height: 26px;
+	line-height: 1.91;
+	padding: 0 20px;
+	text-align: center;
+	text-transform: uppercase;
+	background: url(../images/bg-tag-off.png) no-repeat 0 0;
+	color: #fefefe;
+	font-weight: bold;
+	word-wrap: break-word;
+	overflow: hidden;
+	outline: 0;
+	cursor:pointer;
+}
+.newprd-s1, .newprd-s1 a {
+	z-index: 20
+}
+.newprd-s2, .newprd-s2 a {
+	z-index: 19
+}
+.newprd-s3, .newprd-s3 a {
+	z-index: 18
+}
+.newprd-s4, .newprd-s4 a {
+	z-index: 17
+}
+.newprd-s5, .newprd-s5 a {
+	z-index: 16
+}
+.newprd-s6, .newprd-s6 a {
+	z-index: 15
+}
+.newprd-s7, .newprd-s7 a {
+	z-index: 14
+}
+.hp-tab-newprd .newprd-clip {
+	padding-left:25px;
+}
+.hp-tab-newprd .j-sw-nav .on {
+	position: relative;
+	z-index: 99
+}
+.hp-tab-newprd .j-sw-nav li a:hover, .hp-tab-newprd .j-sw-nav .on a {
+	background-image: url(../images/bg-tag-on.png);
+	z-index: 99;
+	color: #fefefe;
+	text-decoration: none;
+	cursor: pointer;
+}
+.hp-tab-newprd .j-sw-c ul {
+	zoom:1;
+	overflow:hidden;
+	width:940px;
+}
+.hp-tab-newprd .j-sw-c li {
+	float: left;
+	margin-top: 55px;
+	margin-right: 6px;
+	display:inline;
+}
+.hp-tab-newprd .j-sw-c li img {
+	width: 175px;
+	height: 228px;
+	padding: 2px;
+	background-color: #fff;
+	border: 1px solid #ccc
+}
+
+

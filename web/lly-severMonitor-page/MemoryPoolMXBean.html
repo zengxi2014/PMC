@@ -1,0 +1,506 @@
+﻿
+
+<html>
+<head>
+<title>demo</title>
+<script src="js/jquery-2.1.4.min.js"></script>
+<script type="text/javascript" src="js/echarts/esl.js"></script>
+
+<script type="text/javascript">
+//获取地址栏参数串
+function GetQueryString(name) 
+{ 
+     var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)"); 
+     var r = window.parent.document.URL.substr(1).match(reg); 
+     if(r!=null)return  unescape(r[2]); return null; 
+} 
+
+    // var username = GetQueryString("userName")
+    var username = "luoluyun"
+
+     var MemoryPoolInfo;
+$.post("http://121.199.23.184/PerformanceMonitorCenter/serviceMonitor!loadServiceMonitor",{"userName": username,"className":localStorage["class"]},function(data){
+			
+			var obj =$.parseJSON(data);
+						obj=obj["data"][0];
+			  MemoryPoolInfo=obj["MemoryPoolInfo"];
+						   draw();
+			});
+function draw(){
+/****** ͳ��ͼ�� *******/
+require.config({
+    paths:{
+        echarts:'js/echarts/echarts',
+        'echarts/chart/bar' : 'js/echarts/echarts',
+        'echarts/chart/line': 'js/echarts/echarts'
+    }
+});
+require(
+        [
+            'echarts',
+            'echarts/chart/bar',
+            'echarts/chart/line'
+        ],
+        function(ec) {
+            //--- ���� ---
+            var myChart = ec.init(document.getElementById('main'));
+			var PeakArray= [],CollectionArray= [],UsageArray= [];
+			var PeakUsage = MemoryPoolInfo[0]["PeakUsage"];
+			var Usage = MemoryPoolInfo[0]["Usage"]
+			PeakArray.push(PeakUsage["max"]);
+			PeakArray.push(PeakUsage["committed"]);
+			PeakArray.push(PeakUsage["init"]);
+			PeakArray.push(PeakUsage["used"]);
+
+			UsageArray.push(Usage["max"]);
+			UsageArray.push(Usage["committed"]);
+			UsageArray.push(Usage["init"]);
+			UsageArray.push(Usage["used"]);
+            myChart.setOption({
+                tooltip : {
+                    trigger: 'axis'
+                },
+                title:{
+                    text:MemoryPoolInfo[0]["Name"]
+                },
+                legend: {
+				data : [
+                            'PeakUsage','Usage'
+                        ]
+                    
+                },
+                toolbox: {
+                    show : true,
+                    feature : {
+                        mark : {show: true},
+                        dataView : {show: true, readOnly: false},
+                        magicType : {show: true, type: ['line', 'bar']},
+                        restore : {show: true},
+                        saveAsImage : {show: true}
+                    }
+                },
+                calculable : true,
+                xAxis : [
+                    {
+                        type : 'category',
+                        data:[
+                        'max','committed','init','used'
+                    ]
+                    }
+                ],
+                yAxis : [
+                    {
+                        type : 'value',
+                        splitArea : {show : true}
+                    }
+                ],
+                series : [
+                    {  
+			            name:'PeakUsage',  
+			            type:'line',  
+			            
+			            data: PeakArray
+			        },{  
+			            name:'Usage',  
+			            type:'line',  
+			            
+			            data: UsageArray  
+			        }
+					
+                ]
+            });
+        }
+);
+/****** ͳ��ͼ�� *******/
+require.config({
+    paths:{
+        echarts:'js/echarts/echarts',
+        'echarts/chart/bar' : 'js/echarts/echarts',
+        'echarts/chart/line': 'js/echarts/echarts'
+    }
+});
+require(
+        [
+            'echarts',
+            'echarts/chart/bar',
+            'echarts/chart/line'
+        ],
+        function(ec) {
+            //--- ���� ---
+            var myChart = ec.init(document.getElementById('main1'));
+			var PeakArray= [],CollectionArray= [],UsageArray= [];
+			var PeakUsage = MemoryPoolInfo[1]["PeakUsage"];
+			var CollectionUsage = MemoryPoolInfo[1]["CollectionUsage"];
+			var Usage = MemoryPoolInfo[1]["Usage"]
+			PeakArray.push(PeakUsage["max"]);
+			PeakArray.push(PeakUsage["committed"]);
+			PeakArray.push(PeakUsage["init"]);
+			PeakArray.push(PeakUsage["used"]);
+			CollectionArray.push(CollectionUsage["max"]);
+			CollectionArray.push(CollectionUsage["committed"]);
+			CollectionArray.push(CollectionUsage["init"]);
+			CollectionArray.push(CollectionUsage["used"]);
+			UsageArray.push(Usage["max"]);
+			UsageArray.push(Usage["committed"]);
+			UsageArray.push(Usage["init"]);
+			UsageArray.push(Usage["used"]);
+            myChart.setOption({
+                tooltip : {
+                    trigger: 'axis'
+                },
+                title:{
+                    text:MemoryPoolInfo[1]["Name"]
+                },
+                legend: {
+				data : [
+                            'PeakUsage','Usage','CollectionUsage'
+                        ]
+                    
+                },
+                toolbox: {
+                    show : true,
+                    feature : {
+                        mark : {show: true},
+                        dataView : {show: true, readOnly: false},
+                        magicType : {show: true, type: ['line', 'bar']},
+                        restore : {show: true},
+                        saveAsImage : {show: true}
+                    }
+                },
+                calculable : true,
+                xAxis : [
+                    {
+                        type : 'category',
+                        data:[
+                        'max','committed','init','used'
+                    ]
+                    }
+                ],
+                yAxis : [
+                    {
+                        type : 'value',
+                        splitArea : {show : true}
+                    }
+                ],
+                series : [
+                    {  
+			            name:'PeakUsage',  
+			            type:'line',  
+			              
+			            data: PeakArray
+			        },{  
+			            name:'Usage',  
+			            type:'line',  
+			            
+			            data: UsageArray  
+			        }
+					,{  
+			            name:'CollectionUsage',  
+			            type:'line',  
+			            
+			            data: CollectionArray  
+			        }
+                ]
+            });
+        }
+);
+/****** ͳ��ͼ�� *******/
+require.config({
+    paths:{
+        echarts:'js/echarts/echarts',
+        'echarts/chart/bar' : 'js/echarts/echarts',
+        'echarts/chart/line': 'js/echarts/echarts'
+    }
+});
+require(
+        [
+            'echarts',
+            'echarts/chart/bar',
+            'echarts/chart/line'
+        ],
+        function(ec) {
+            //--- ���� ---
+            var myChart = ec.init(document.getElementById('main2'));
+			var PeakArray= [],CollectionArray= [],UsageArray= [];
+			var PeakUsage = MemoryPoolInfo[2]["PeakUsage"];
+			var CollectionUsage = MemoryPoolInfo[2]["CollectionUsage"];
+			var Usage = MemoryPoolInfo[2]["Usage"]
+			PeakArray.push(PeakUsage["max"]);
+			PeakArray.push(PeakUsage["committed"]);
+			PeakArray.push(PeakUsage["init"]);
+			PeakArray.push(PeakUsage["used"]);
+			CollectionArray.push(CollectionUsage["max"]);
+			CollectionArray.push(CollectionUsage["committed"]);
+			CollectionArray.push(CollectionUsage["init"]);
+			CollectionArray.push(CollectionUsage["used"]);
+			UsageArray.push(Usage["max"]);
+			UsageArray.push(Usage["committed"]);
+			UsageArray.push(Usage["init"]);
+			UsageArray.push(Usage["used"]);
+            myChart.setOption({
+                tooltip : {
+                    trigger: 'axis'
+                },
+                title:{
+                    text:MemoryPoolInfo[2]["Name"]
+                },
+                legend: {
+				data : [
+                            'PeakUsage','Usage','CollectionUsage'
+                        ]
+                    
+                },
+                toolbox: {
+                    show : true,
+                    feature : {
+                        mark : {show: true},
+                        dataView : {show: true, readOnly: false},
+                        magicType : {show: true, type: ['line', 'bar']},
+                        restore : {show: true},
+                        saveAsImage : {show: true}
+                    }
+                },
+                calculable : true,
+                xAxis : [
+                    {
+                        type : 'category',
+                        data:[
+                        'max','committed','init','used'
+                    ]
+                    }
+                ],
+                yAxis : [
+                    {
+                        type : 'value',
+                        splitArea : {show : true}
+                    }
+                ],
+                series : [
+                    {  
+			            name:'PeakUsage',  
+			            type:'line',  
+			            
+			            data: PeakArray
+			        },{  
+			            name:'Usage',  
+			            type:'line',  
+			             
+			            data: UsageArray  
+			        }
+					,{  
+			            name:'CollectionUsage',  
+			            type:'line',  
+			            
+			            data: CollectionArray  
+			        }
+                ]
+            });
+        }
+);
+/****** ͳ��ͼ�� *******/
+require.config({
+    paths:{
+        echarts:'js/echarts/echarts',
+        'echarts/chart/bar' : 'js/echarts/echarts',
+        'echarts/chart/line': 'js/echarts/echarts'
+    }
+});
+require(
+        [
+            'echarts',
+            'echarts/chart/bar',
+            'echarts/chart/line'
+        ],
+        function(ec) {
+            //--- ���� ---
+            var myChart = ec.init(document.getElementById('main3'));
+			var PeakArray= [],CollectionArray= [],UsageArray= [];
+			var PeakUsage = MemoryPoolInfo[3]["PeakUsage"];
+			var CollectionUsage = MemoryPoolInfo[3]["CollectionUsage"];
+			var Usage = MemoryPoolInfo[3]["Usage"]
+			PeakArray.push(PeakUsage["max"]);
+			PeakArray.push(PeakUsage["committed"]);
+			PeakArray.push(PeakUsage["init"]);
+			PeakArray.push(PeakUsage["used"]);
+			CollectionArray.push(CollectionUsage["max"]);
+			CollectionArray.push(CollectionUsage["committed"]);
+			CollectionArray.push(CollectionUsage["init"]);
+			CollectionArray.push(CollectionUsage["used"]);
+			UsageArray.push(Usage["max"]);
+			UsageArray.push(Usage["committed"]);
+			UsageArray.push(Usage["init"]);
+			UsageArray.push(Usage["used"]);
+            myChart.setOption({
+                tooltip : {
+                    trigger: 'axis'
+                },
+                title:{
+                    text:MemoryPoolInfo[3]["Name"]
+                },
+                legend: {
+				data : [
+                            'PeakUsage','Usage','CollectionUsage'
+                        ]
+                    
+                },
+                toolbox: {
+                    show : true,
+                    feature : {
+                        mark : {show: true},
+                        dataView : {show: true, readOnly: false},
+                        magicType : {show: true, type: ['line', 'bar']},
+                        restore : {show: true},
+                        saveAsImage : {show: true}
+                    }
+                },
+                calculable : true,
+                xAxis : [
+                    {
+                        type : 'category',
+                        data:[
+                        'max','committed','init','used'
+                    ]
+                    }
+                ],
+                yAxis : [
+                    {
+                        type : 'value',
+                        splitArea : {show : true}
+                    }
+                ],
+                series : [
+                    {  
+			            name:'PeakUsage',  
+			            type:'line',  
+			            
+			            data: PeakArray
+			        },{  
+			            name:'Usage',  
+			            type:'line',  
+			            
+			            data: UsageArray  
+			        }
+					,{  
+			            name:'CollectionUsage',  
+			            type:'line',  
+			             
+			            data: CollectionArray  
+			        }
+                ]
+            });
+        }
+);
+/****** ͳ��ͼ�� *******/
+require.config({
+    paths:{
+        echarts:'js/echarts/echarts',
+        'echarts/chart/bar' : 'js/echarts/echarts',
+        'echarts/chart/line': 'js/echarts/echarts'
+    }
+});
+require(
+        [
+            'echarts',
+            'echarts/chart/bar',
+            'echarts/chart/line'
+        ],
+        function(ec) {
+            //--- ���� ---
+            var myChart = ec.init(document.getElementById('main4'));
+			var PeakArray= [],CollectionArray= [],UsageArray= [];
+			var PeakUsage = MemoryPoolInfo[4]["PeakUsage"];
+			var CollectionUsage = MemoryPoolInfo[4]["CollectionUsage"];
+			var Usage = MemoryPoolInfo[4]["Usage"]
+			PeakArray.push(PeakUsage["max"]);
+			PeakArray.push(PeakUsage["committed"]);
+			PeakArray.push(PeakUsage["init"]);
+			PeakArray.push(PeakUsage["used"]);
+			CollectionArray.push(CollectionUsage["max"]);
+			CollectionArray.push(CollectionUsage["committed"]);
+			CollectionArray.push(CollectionUsage["init"]);
+			CollectionArray.push(CollectionUsage["used"]);
+			UsageArray.push(Usage["max"]);
+			UsageArray.push(Usage["committed"]);
+			UsageArray.push(Usage["init"]);
+			UsageArray.push(Usage["used"]);
+            myChart.setOption({
+                tooltip : {
+                    trigger: 'axis'
+                },
+                title:{
+                    text:MemoryPoolInfo[4]["Name"]
+                },
+                legend: {
+				data : [
+                            'PeakUsage','Usage','CollectionUsage'
+                        ]
+                    
+                },
+                toolbox: {
+                    show : true,
+                    feature : {
+                        mark : {show: true},
+                        dataView : {show: true, readOnly: false},
+                        magicType : {show: true, type: ['line', 'bar']},
+                        restore : {show: true},
+                        saveAsImage : {show: true}
+                    }
+                },
+                calculable : true,
+                xAxis : [
+                    {
+                        type : 'category',
+                        data:[
+                        'max','committed','init','used'
+                    ]
+                    }
+                ],
+                yAxis : [
+                    {
+                        type : 'value',
+                        splitArea : {show : true}
+                    }
+                ],
+                series : [
+                    {  
+			            name:'PeakUsage',  
+			            type:'line',  
+			            
+			            data: PeakArray
+			        },{  
+			            name:'Usage',  
+			            type:'line',  
+			            
+			            data: UsageArray  
+			        }
+					,{  
+			            name:'CollectionUsage',  
+			            type:'line',  
+			            
+			            data: CollectionArray  
+			        }
+                ]
+            });
+        }
+);
+}
+
+</script>
+</head>
+<body style="padding: 10px;">
+<table>
+<tr>
+<th><div id="main"  style="width: 800px; height: 480px; margin: 50px "></div></th>
+<th><div id="main1"  style="width: 800px; height: 480px; margin: 50px"></div></th>
+</tr>
+<tr>
+<th><div id="main2"  style="width: 800px; height: 480px; margin: 50px"></div></th>
+<th><div id="main3"  style="width: 800px; height: 480px; margin: 50px"></div></th>
+</tr>
+<tr>
+<th><div id="main4"  style="width: 800px; height: 480px; margin: 50px"></div></th>
+<th><div id="main5"  style="width: 800px; height: 480px; margin: 50px"></div></th>
+</tr>
+</table>
+</body>
+</html>

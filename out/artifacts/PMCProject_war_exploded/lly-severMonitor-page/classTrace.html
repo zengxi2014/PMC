@@ -1,0 +1,88 @@
+﻿
+<!DOCTYPE html>
+<html>
+<head>
+<title>classTrace</title>
+<link rel="stylesheet" href="css/bootstrap.css"/>
+<style type="text/css">
+body{
+font-family: "Hiragino Sans GB",PingHei,"Helvetica Neue",Helvetica,Arial,Verdana,"Microsoft Yahei",sans-serif;
+font-size :0.8em;
+color: #1b74b5
+font-style: inherit;
+font-variant: inherit;
+font-weight: inherit;
+line-height: inherit;
+}
+#classtable
+{
+
+}
+</style>
+<script src="js/jquery-2.1.4.min.js"></script>
+<script type="text/javascript">
+ 
+
+$(function(){
+//获取地址栏参数串
+function GetQueryString(name) 
+{ 
+     var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)"); 
+     var r = window.parent.document.URL.substr(1).match(reg); 
+     if(r!=null)return  unescape(r[2]); return null; 
+} 
+
+	// var username = GetQueryString("userName")
+	var username = "luoluyun"
+
+
+$.post("http://121.199.23.184/PerformanceMonitorCenter/serviceMonitor!loadServiceMonitor",{"userName": username,"className":"void com.zhaoxiajia.model.TUser.setNickname(String)"},function(data){
+			//alert(data);
+			data =$.parseJSON(data);
+			//alert(data);
+			});
+
+$.post("http://121.199.23.184/PerformanceMonitorCenter/classTrace!loadClassTrace",{"userName": username},function(data){
+			
+			data =$.parseJSON(data);
+			
+			 var $table = $("#classtable");
+						data=data["data"];
+						   var intable;
+						   for(i=0;i<data.length;i++)
+						   {
+						   //alert(idname);
+						   var idname=data[i]["className"];
+						   idname=idname.replace(" ","_");
+						   idname=idname.replace(".","_");
+						  
+						   idname=idname.substr(0,idname.length-2);
+						   intable+='<tr  id="'+idname+'"attr="'+
+						   data[i]["className"]+'" ><th style=" width:800px;color:#1b74b5;font-size :0.8em;" ><a >'+
+						   data[i]["className"]+'</a></th><th style=" width:200px;color:#1b74b5;font-size :0.8em;">'+
+						   data[i]["time"]+'</th></tr>'
+						   }
+						   $table.append(intable);
+			});
+   
+
+$(document).on("click", "#classtable tr", function(e){
+
+    //alert($(this).attr("attr"));
+	localStorage["class"] = $(this).attr("attr");
+	self.location='maininfo.html';
+  });
+  
+}); 
+
+</script>
+</head>
+<body style="padding: 10px;background:#e5e5e5">
+<div  style="width:992px;height:auto;border-top:#a6d0e7 1px solid;background-color:#c9e7f8; padding:5px;color:#333;font-size :0.9em; ">THE CLASS TRACE</div>
+<div id="classname" style=" width:1000px;height:auto;border:#cccccc solid thin  ">
+<table  id="classtable"  class="table table-hover table table-striped" style=" text-align:left;background:#ffffff;border:solid 3px #e6e6e6">
+
+</div>
+
+</body>
+</html>

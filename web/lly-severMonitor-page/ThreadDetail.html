@@ -1,0 +1,286 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<title>demo</title>
+<link rel="stylesheet" href="css/bootstrap.css"/>
+
+<style type="text/css">
+body{
+font-family: "Hiragino Sans GB",PingHei,"Helvetica Neue",Helvetica,Arial,Verdana,"Microsoft Yahei",sans-serif;
+font-size :0.8em;
+color: #1b74b5
+font-style: inherit;
+font-variant: inherit;
+font-weight: inherit;
+line-height: inherit;
+}
+table tr th{
+ border-top:solid 1px #e6e6e6
+}
+</style>
+<script src="js/jquery-2.1.4.min.js"></script>
+<script type="text/javascript" src="js/echarts/esl.js"></script>
+<script type="text/javascript">
+
+var CpuTime = [];
+var ThreadId = []; 
+var ThreadState=[];
+var ThreadName=[];
+var LockName=[];
+$.post("http://121.199.23.184/PerformanceMonitorCenter/serviceMonitor!loadServiceMonitor",{"userName":"luoluyun","className":localStorage["class"]},function(data){
+			
+			var obj =$.parseJSON(data);
+						obj=obj["data"][0];
+			   ThreadDetail(obj);
+			   
+			   
+						   draw();
+						   Threadinfo(obj);
+			});
+			function Threadinfo(obj){
+			var info=obj["ThreadInfo"]["Threadinfo"];
+			var $table = $("#threadinfo");
+			var intable;
+			var max=10;
+			var len=info.length;
+			 for(var i=0;i<max;i++){
+						
+				intable+=' <tr style="width: 100%;"> <th id = "Threadname" style="text-align: center;width: 15%;" >'+info[i]["ThreadName"]
+				+'</th><th id = "Threadid" style="text-align: center;width: 10%;" >'+info[i]["ThreadId"]
+				+'</th><th id = "ThreadState" style="text-align: center;width: 15%;" >'+info[i]["ThreadState"]
+				+'</th><th id = "ThreadCpuTime" style="text-align: center;width: 10%;" >'+info[i]["CpuTime"]
+				+'</th><th id = "ThreadLokename" style="text-align: center;width: 50%;" >'+info[i]["LockName"]
+				+'</th> </tr>';
+			    $table.append(intable);
+             }
+			}
+				function ThreadDetail(obj){
+			 var info=obj["ThreadInfo"]["Threadinfo"];
+			 var max=10;
+			var len=info.length;
+			 for(var i=0;i<max;i++){
+						 CpuTime.push(info[i]["CpuTime"]);
+						 ThreadId.push(info[i]["ThreadId"]);
+						
+						 ThreadName.push(info[i]["ThreadName"]);
+						 LockName.push(info[i]["LockName"]);
+						 var State=info[i]["ThreadState"]
+						 if(State=="RUNNABLE")
+						 {
+						 State=1
+						 }
+						 else if(State=="WAITING")
+						 {
+						 State=2
+						 }
+						 else if(State=="RUNNABLE")
+						 {
+						 State=3
+						 }
+						 else {
+						 State=0
+						 }
+					var item=[];
+					item.push(info[i]["ThreadId"]);
+					item.push(State);
+					ThreadState.push(item);
+					
+             }
+			 
+			 //alert(ThreadState);
+			}
+			function draw(){
+/****** �ڴ���Ϣͼ�� *******/
+require.config({
+    paths:{
+        echarts:'js/echarts/echarts',
+        'echarts/chart/bar' : 'js/echarts/echarts',
+        'echarts/chart/line': 'js/echarts/echarts'
+    }
+});
+require(
+        [
+            'echarts',
+            'echarts/chart/bar',
+            'echarts/chart/line'
+        ],
+        function(ec) {
+            //--- ���� ---
+            var myChart = ec.init(document.getElementById('CpuTime'));
+            myChart.setOption({
+                tooltip : {
+                    trigger: 'axis',
+					 axisPointer:{
+                       show: true,
+            type : 'cross',
+            lineStyle: {
+                type : 'dashed',
+                width : 1
+            }
+        }
+                },
+                title:{
+                    text:'ThreadCpuTime'
+                },
+                legend: {
+				data : [
+                            'CpuTime'
+                        ]
+                    
+                },
+                toolbox: {
+                    show : true,
+                    feature : {
+                        mark : {show: true},
+                        dataView : {show: true, readOnly: false},
+                        magicType : {show: true, type: ['line', 'bar']},
+                        restore : {show: true},
+                        saveAsImage : {show: true}
+						
+                    }
+                },
+                calculable : true,
+                xAxis : [
+                    {
+                        type : 'category',
+                        data:ThreadId
+                    
+                    }
+                ],
+                yAxis : [
+                    {
+                        type : 'value',
+                        splitArea : {show : true}
+                    }
+                ],
+                series : [
+                    {  
+			            name:'CpuTime',  
+			            type:'line',  
+			            stack:'ThreadState',  
+			            data: CpuTime,
+						markPoint : {
+                                 data :    [
+                                                 {type : 'max', name: '最大值'},
+                                                 {type : 'min', name: '最小值'}
+                                           ]
+                                     },
+					   markLine : {
+                                    data : [
+                                                   {type : 'average', name: '平均值'}
+                                            ]
+                                 }
+			        },
+					
+                ]
+            });
+        }
+);
+/****** ecpustate *******/
+require.config({
+    paths:{
+        echarts:'js/echarts/echarts',
+        'echarts/chart/bar' : 'js/echarts/echarts',
+        'echarts/chart/line': 'js/echarts/echarts',
+		'echarts/chart/pie': 'js/echarts/echarts',
+		'echarts/chart/k': 'js/echarts/echarts' , 
+        'echarts/chart/scatter': 'js/echarts/echarts' 
+    }
+});
+require(
+        [
+            'echarts',
+            'echarts/chart/bar',
+            'echarts/chart/line'
+        ],
+        function(ec) {
+            //--- ֛׹ ---
+            var myChart = ec.init(document.getElementById('ThreadState'));
+            myChart.setOption({
+                 tooltip : {
+                     trigger: 'axis',
+                     showDelay : 0,
+					 axisPointer:{
+            show: true,
+            type : 'cross',
+            lineStyle: {
+                type : 'dashed',
+                width : 1
+            }
+        }
+        
+              },
+                title:{
+                    text:'ThreadState'
+                },
+                legend: {
+				data : [
+                            'ThreadState'
+                        ]
+                    
+                },
+                toolbox: {
+                    show : true,
+             
+                     feature : {
+                             mark : {show: true},
+                             dataZoom : {show: true},
+                              dataView : {show: true, readOnly: false},
+                             restore : {show: true},
+                              saveAsImage : {show: true}
+                    }
+                },
+                calculable : true,
+                xAxis : [
+                    {
+                        type : 'value',
+                       
+                    
+                    }
+                ],
+                yAxis : [
+                    {
+                        type : 'value',
+						scale:true,
+                       
+                    }
+                ],
+                series : [
+                    {  
+			            name:'CpuTime',  
+			            type:'scatter',  
+			            
+			            data:ThreadState,
+						 markPoint : {
+                data : [
+                    {type : 'max', name: '最大值'},
+                    {type : 'min', name: '最小值'}
+                ]
+            },
+			        },
+					
+                ]
+            });
+        }
+);
+}
+
+</script>
+</head>
+<body style="padding: 10px;width:100%;">
+<div id="CpuTime"  style="min-width: 342px; height: 480px; margin: 0 auto"></div>
+<div id="ThreadState"  style="min-width: 342px; height: 480px; margin: 0 auto"></div>
+<table id ="threadinfo" class="table table-hover  table table-striped"  style="text-align:left;border:solid 3px #e6e6e6" style="width: 100%;">
+    <tr style="width: 100%;">
+        <th id = "Threadname" style="text-align: center;width: 15%;" >Threadname</th>
+		<th id = "Threadid" style="text-align: center;width: 10%;" >id</th>
+		<th id = "ThreadState" style="text-align: center;width: 15%;" >State</th>
+		<th id = "ThreadCpuTime" style="text-align: center;width: 10%;" >CpuTime</th>
+		<th id = "ThreadLokename" style="text-align: center;width: 50%;" >LockName</th>
+        
+    </tr>
+</table>
+<div id="thread"  style="min-width: 342px; height: 480px; margin: 20 auto"></div>
+</body>
+
+</html>

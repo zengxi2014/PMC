@@ -1,0 +1,503 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>崩溃信息</title>
+<link href="css/lanrenzhijia.css" type="text/css" rel="stylesheet" />
+<script type="text/javascript" src="js/jquery.js"></script>
+<script type="text/javascript" src="js/jquery.SuperSlide.js"></script>
+<script src="http://echarts.baidu.com/build/dist/echarts-all.js"></script>
+ <script>
+ function zy_parse(){
+
+    var params = {};
+
+    var loc = String(document.location);
+
+    if (loc.indexOf("?") > 0) 
+
+        loc = loc.substr(loc.indexOf('?') + 1);
+
+    else 
+
+        loc = uexWindow.getUrlQuery();
+
+    var pieces = loc.split('&');
+
+    params.keys = [];
+
+    for (var i = 0; i < pieces.length; i += 1) {
+
+        var keyVal = pieces[i].split('=');
+
+        params[keyVal[0]] = decodeURIComponent(keyVal[1]);
+
+        params.keys.push(keyVal[0]);
+
+    }
+
+    return params;
+
+}
+// 分行显示崩溃信息
+function splitCrashInfo(CrackStackInfo){
+    var a = CrackStackInfo.split("\n\t")
+    $(".product p").html(a[0])
+    for(var i = 1; i < a.length; i++){
+        $(".product").append("<p style='margin-left:50px'>"+a[i]+"</p>")
+    }
+}
+
+//获取地址栏参数串
+function GetQueryString(name) 
+{ 
+     var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)"); 
+     var r = window.parent.document.URL.substr(1).match(reg); 
+     if(r!=null)return  unescape(r[2]); return null; 
+} 
+
+    // var appId = GetQueryString("appId")
+    
+    var appId="85d4a553-ee8d-4136-80ab-2469adcae44d";
+
+ var params=zy_parse();
+ var hashCode=params.hashCode;
+ var data=[]
+	$.post("http://121.199.23.184/PerformanceMonitorCenter/loadCrackReport!loadCrashReportAnalysis?appId="+appId+"&hashCode="+hashCode, function(res){//#代表后台验证码请求处理
+			 var result = JSON.parse(res);
+			 var index, array;
+			 array=result.recentCrashTrend;
+			 var recentCrashTrend=[]
+			 recentCrashTrend={recent7Days:array.recent7Days,recent7DaysCrashTimes:array.recent7DaysCrashTimes}
+			 var CrackStackInfo=result.CrackStackInfo.CrackStackInfo;
+                               splitCrashInfo(CrackStackInfo)
+			 var appVersion=[]
+			 appVersion={versionType:result.appVersion.versionType,versionInfo:result.appVersion.versionInfo}
+			 var MemoryUsageRate=[]
+			 MemoryUsageRate={MemoryUsageLevel:result.MemoryUsageRate.MemoryUsageLevel,MemoryUsageLevelValue:result.MemoryUsageRate.MemoryUsageLevelValue}
+			 var CPUUsageRate=[]
+			 CPUUsageRate={CPUUsageLevel:result.CPUUsageRate.CPUUsageLevel,CPUUsageLevelValue:result.CPUUsageRate.CPUUsageLevelValue}
+			 var Manufacturer=[]
+			 Manufacturer={ManufacturerInfo:result.Manufacturer.ManufacturerInfo,ManufacturerType:result.Manufacturer.ManufacturerType}
+			 VersionRelease=[]
+			 VersionRelease={VersionReleaseType:result.VersionRelease.VersionReleaseType,VersionReleaseInfo:result.VersionRelease.VersionReleaseInfo}
+
+
+  $(function() {
+    // 使用
+    var crash_trend_chart = echarts.init(document.getElementById('crash_trend_chart'));
+    var appversion_chart = echarts.init(document.getElementById('appversion_chart'));
+    var cpu_used_chart = echarts.init(document.getElementById('cpu_used_chart'));
+    var memory_used_chart = echarts.init(document.getElementById('memory_used_chart'));
+    var deviceinfo_chart = echarts.init(document.getElementById('deviceinfo_chart'));
+    var osinfo_chart = echarts.init(document.getElementById('osinfo_chart'));
+    var crash_trend_option= {
+                    title : {
+                        text: '',
+                    },
+                    tooltip : {
+                        trigger: 'axis'
+                    },
+                    legend: {
+                        data:['崩溃次数']
+                    },
+                    toolbox: {
+                        show : true,
+                        feature : {
+                            mark : {show: true},
+                            dataView : {show: true, readOnly: false},
+                            magicType : {show: true, type: ['line', 'bar']},
+                            restore : {show: true},
+                            saveAsImage : {show: true}
+                        }
+                    },
+                    calculable : true,
+                    xAxis : [
+                        {
+                            type : 'category',
+                            boundaryGap : false,
+                            data : recentCrashTrend.recent7Days
+                        }
+                    ],
+                    yAxis : [
+                        {
+                            type : 'value',
+                            axisLabel : {
+                                formatter: '{value}'
+                            }
+                        }
+                    ],
+                    series : [
+                        {
+                            name:'崩溃次数',
+                            type:'line',
+                            data:recentCrashTrend.recent7DaysCrashTimes,
+                            markPoint : {
+                                data : [
+                                    {type : 'max', name: '最大值'},
+                                    {type : 'min', name: '最小值'}
+                                ]
+                            },
+                            markLine : {
+                                data : [
+                                    {type : 'average', name: '平均值'}
+                                ]
+                            }
+                        }
+                    ]
+                };
+    var appversion_option = {
+                    tooltip : {
+                        trigger: 'item',
+                        formatter: "{a} <br/>{b} : {c} ({d}%)"
+                    },
+                    legend: {
+                        orient : 'vertical',
+                        x : 'left',
+                        data:appVersion.versionType
+                    },
+                    toolbox: {
+                        show : true,
+                        feature : {
+                            mark : {show: true},
+                            dataView : {show: true, readOnly: false},
+                            magicType : {
+                                show: true,
+                                type: ['pie', 'funnel'],
+                                option: {
+                                    funnel: {
+                                        x: '25%',
+                                        width: '50%',
+                                        funnelAlign: 'center',
+                                        max: 1548
+                                    }
+                                }
+                            },
+                            restore : {show: true},
+                            saveAsImage : {show: true}
+                        }
+                    },
+                    calculable : true,
+                    series : [
+                        {
+                            name:'应用版本',
+                            type:'pie',
+                            radius : ['50%', '70%'],
+                            itemStyle : {
+                                normal : {
+                                    label : {
+                                        show : false
+                                    },
+                                    labelLine : {
+                                        show : false
+                                    }
+                                },
+                                emphasis : {
+                                    label : {
+                                        show : true,
+                                        position : 'center',
+                                        textStyle : {
+                                            fontSize : '30',
+                                            fontWeight : 'bold'
+                                        }
+                                    }
+                                }
+                            },
+                            data:appVersion.versionInfo
+                        }
+                    ]
+                };
+				//CPUUsageRate={CPUUsageLevel:result.CPUUsageRate.CPUUsageLevel,CPUUsageLevelValue:result.CPUUsageRate.CPUUsageLevelValue}
+                var cpu_used_option = {
+                    title : {
+                        text: '当前应用CPU占用率对崩溃的影响',
+                    },
+                    tooltip : {
+                        trigger: 'axis'
+                    },
+                    legend: {
+                        data:['崩溃率(%)']
+                    },
+                    toolbox: {
+                        show : true,
+                        feature : {
+                            mark : {show: true},
+                            dataView : {show: true, readOnly: false},
+                            magicType : {show: true, type: ['line', 'bar']},
+                            restore : {show: true},
+                            saveAsImage : {show: true}
+                        }
+                    },
+                    calculable : true,
+                    xAxis : [
+                        {
+                            type : 'category',
+                            data : CPUUsageRate.CPUUsageLevel
+                        }
+                    ],
+                    yAxis : [
+                        {
+                            type : 'value',
+                            axisLabel : {
+                                formatter: '{value} %'
+                            }
+                        }
+                    ],
+                    series : [
+                        {
+                            name:'崩溃率(%)',
+                            type:'bar',
+                            data:CPUUsageRate.CPUUsageLevelValue,
+                            markPoint : {
+                                data : [
+                                    {type : 'max', name: '最大值'},
+                                    {type : 'min', name: '最小值'}
+                                ]
+                            },
+                            markLine : {
+                                data : [
+                                    {type : 'average', name: '平均值'}
+                                ]
+                            }
+                        }
+                    ]
+                };
+
+
+        var memory_used_option = {
+                    title : {
+                        text: '当前应用内存占用量对崩溃的影响',
+                    },
+                    tooltip : {
+                        trigger: 'axis'
+                    },
+                    legend: {
+                        data:['崩溃次数']
+                    },
+                    toolbox: {
+                        show : true,
+                        feature : {
+                            mark : {show: true},
+                            dataView : {show: true, readOnly: false},
+                            magicType : {show: true, type: ['line', 'bar']},
+                            restore : {show: true},
+                            saveAsImage : {show: true}
+                        }
+                    },
+					//MemoryUsageRate={MemoryUsageLevel:result.MemoryUsageRate.MemoryUsageLevel,MemoryUsageLevelValue:result.MemoryUsageRate.MemoryUsageLevelValue}
+                    calculable : true,
+                    xAxis : [
+                        {
+                            type : 'category',
+                            data : MemoryUsageRate.MemoryUsageLevel
+                        }
+                    ],
+                    yAxis : [
+                        {
+                            type : 'value',
+               axisLabel : {
+                                formatter: '{value} '
+                            }
+                        }
+                    ],
+                    series : [
+                        {
+                            name:'崩溃次数',
+                            type:'bar',
+							data:MemoryUsageRate.MemoryUsageLevelValue,
+                            markPoint : {
+                                data : [
+                                    {type : 'max', name: '最大值'},
+                                    {type : 'min', name: '最小值'}
+                                ]
+                            },
+                            markLine : {
+                                data : [
+                                    {type : 'average', name: '平均值'}
+                                ]
+                            }
+                        }
+                    ]
+                };
+
+//Manufacturer={ManufacturerInfo:result.Manufacturer.ManufacturerInfo,ManufacturerType:result.Manufacturer.ManufacturerType}
+ var device_option = {
+                    tooltip : {
+                        trigger: 'item',
+                        formatter: "{a} <br/>{b} : {c} ({d}%)"
+                    },
+                    legend: {
+                        orient : 'vertical',
+                        x : 'left',
+                        data:Manufacturer.ManufacturerType
+                    },
+                    toolbox: {
+                        show : true,
+                        feature : {
+                            mark : {show: true},
+                            dataView : {show: true, readOnly: false},
+                            magicType : {
+                                show: true,
+                                type: ['pie', 'funnel'],
+                                option: {
+                                    funnel: {
+                                        x: '25%',
+                                        width: '50%',
+                                        funnelAlign: 'center',
+                                        max: 1548
+                                    }
+                                }
+                            },
+                            restore : {show: true},
+                            saveAsImage : {show: true}
+                        }
+                    },
+                    calculable : true,
+                    series : [
+                        {
+                            name:'终端设备',
+                            type:'pie',
+                            radius : ['50%', '70%'],
+                            itemStyle : {
+                                normal : {
+                                    label : {
+                                        show : false
+                                    },
+                                    labelLine : {
+                                        show : false
+                                    }
+                                },
+                                emphasis : {
+                                    label : {
+                                        show : true,
+                                        position : 'center',
+                                        textStyle : {
+                                            fontSize : '30',
+                                            fontWeight : 'bold'
+                                        }
+                                    }
+                                }
+                            },
+                            data:Manufacturer.ManufacturerInfo
+                        }
+                    ]
+                };
+				//VersionRelease={VersionReleaseType:result.VersionRelease.VersionReleaseType,VersionReleaseInfo:result.VersionRelease.VersionReleaseInfo}
+                var osinfo_option = {
+                    tooltip : {
+                        trigger: 'item',
+                        formatter: "{a} <br/>{b} : {c} ({d}%)"
+                    },
+                    legend: {
+                        orient : 'vertical',
+                        x : 'left',
+                        data:VersionRelease.VersionReleaseType
+                    },
+                    toolbox: {
+                        show : true,
+                        feature : {
+                            mark : {show: true},
+                            dataView : {show: true, readOnly: false},
+                            magicType : {
+                                show: true,
+                                type: ['pie', 'funnel'],
+                                option: {
+                                    funnel: {
+                                        x: '25%',
+                                        width: '50%',
+                                        funnelAlign: 'center',
+                                        max: 1548
+                                    }
+                                }
+                            },
+                            restore : {show: true},
+                            saveAsImage : {show: true}
+                        }
+                    },
+                    calculable : true,
+                    series : [
+                        {
+                            name:'操作系统',
+                            type:'pie',
+                            radius : ['50%', '70%'],
+                            itemStyle : {
+                                normal : {
+                                    label : {
+                                        show : false
+                                    },
+                                    labelLine : {
+                                        show : false
+                                    }
+                                },
+                                emphasis : {
+                                    label : {
+                                        show : true,
+                                        position : 'center',
+                                        textStyle : {
+                                            fontSize : '30',
+                                            fontWeight : 'bold'
+                                        }
+                                    }
+                                }
+                            },
+                            data:VersionRelease.VersionReleaseInfo
+                        }
+                    ]
+                };
+    crash_trend_chart.setOption(crash_trend_option);
+    appversion_chart.setOption(appversion_option);
+    cpu_used_chart.setOption(cpu_used_option);
+    memory_used_chart.setOption(memory_used_option);
+    deviceinfo_chart.setOption(device_option);
+    osinfo_chart.setOption(osinfo_option);
+    });
+	});
+    </script>
+</head>
+
+<body>
+<h1 align="center" style="margin-top:30px;margin-bottom:20px">最近七天崩溃率</h1>
+ <div id="crash_trend_chart" style="height:500px;width:1020px;margin:auto"></div>
+ <div style="height:50pd"></div>
+ <h1 align="center" style="margin-top:20px;margin-bottom:20px">崩溃分析</h1>
+<div class="hp-tab-newprd" >
+  <ul class="j-sw-nav">
+    <li class="newprd-s1"><a>堆栈信息</a></li>
+    <li class="newprd-s2"><a>应用版本</a></li>
+    <li class="newprd-s3"><a>CPU占用率</a></li>
+    <li class="newprd-s3"><a>内存占用率</a></li>
+    <li class="newprd-s4"><a>设备信息</a></li>
+    <li class="newprd-s5"><a>操作系统</a></li>
+
+  </ul>
+  <div class="newprd-clip">
+    <div class="tempWrap" style="overflow:hidden; position:relative; width:940px">
+      <div class="j-sw-c" style="width: 940px; position: relative; overflow: hidden; padding: 0px; margin: 0px; left: -5640px;height:800px">
+        <div class="product show">
+          <p style="margin-left:50px" >CrackStackInfo</p>
+        </div>
+
+      <div id="appversion_chart" class="cf" style="height: 400px;width:940px"></div>
+
+    <!--性能信息-->
+
+      <div id="cpu_used_chart" class="cf" style="height: 400px;width:940px"></div>
+      <div id="memory_used_chart" class="cf" style="height: 400px;width:940px"></div>
+    <!--设备信息-->
+
+      <div id="deviceinfo_chart" class="cf" style="height: 400px;width:940px"></div>
+
+    <!--操作系统--> 
+
+      <div id="osinfo_chart" class="cf" style="height: 400px;width:940px"></div>
+
+
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+jQuery(".hp-tab-newprd").slide({ titCell:".j-sw-nav li",mainCell:".j-sw-c",effect:"left",easing:"easeInOutSine",delayTime:800 });
+</script>
+</body>
+</html>

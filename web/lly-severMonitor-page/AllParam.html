@@ -1,0 +1,303 @@
+﻿
+
+<html>
+<head>
+<title>demo</title>
+<link rel="stylesheet" href="css/bootstrap.css"/>
+<script src="js/jquery-2.1.4.min.js"></script>
+<script type="text/javascript" src="js/echarts/esl.js"></script>
+
+<script type="text/javascript">
+$(function(){
+var NonHeapary = [];
+var Heapary = []; 
+var CollectionCount=[];//GCcount
+var CollectionTime=[];
+
+//获取地址栏参数串
+function GetQueryString(name) 
+{ 
+     var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)"); 
+     var r = window.parent.document.URL.substr(1).match(reg); 
+     if(r!=null)return  unescape(r[2]); return null; 
+} 
+
+    // var username = GetQueryString("userName")
+    var username = "luoluyun"
+
+$.post("http://121.199.23.184/PerformanceMonitorCenter/serviceMonitor!loadServiceMonitor",{"userName":username,"className":localStorage["class"]},function(data){
+			
+			var obj =$.parseJSON(data);
+						obj=obj["data"][0];
+			 MemoryInfo(obj);
+						  GarbageCollector(obj);
+						   draw();
+			});
+
+
+			//解析内存信息
+			function MemoryInfo(obj){
+			 var NonHeapObj=obj["MemoryInfo"]["Non-Heap Memory Usage"];
+						  NonHeapary.push(NonHeapObj["max"]);
+						   NonHeapary.push(NonHeapObj["committed"]);
+						    NonHeapary.push(NonHeapObj["init"]);
+							 NonHeapary.push(NonHeapObj["used"]);
+							  var HeapObj=obj["MemoryInfo"]["Heap Memory Usage"];
+						  Heapary.push(HeapObj["max"]);
+						   Heapary.push(HeapObj["committed"]);
+						    Heapary.push(HeapObj["init"]);
+							 Heapary.push(HeapObj["used"]);
+			}
+			//解析GC信息
+			function GarbageCollector(obj){
+			var info = obj["GCInfo"];
+			for(var i=0;i<info.length;i++)
+			{
+			CollectionCount.push(info[i]["CollectionCount"]);
+			CollectionTime.push(info[i]["CollectionTime"]);
+			}
+			}
+			
+function draw(){
+			//alert(NonHeapary);
+/****** 内存信息图形 *******/
+require.config({
+    paths:{
+        echarts:'js/echarts/echarts',
+        'echarts/chart/bar' : 'js/echarts/echarts',
+        'echarts/chart/line': 'js/echarts/echarts'
+    }
+});
+require(
+        [
+            'echarts',
+            'echarts/chart/bar',
+            'echarts/chart/line'
+        ],
+        function(ec) {
+            //--- 折柱 ---
+            var myChart = ec.init(document.getElementById('MemoryPoolInfo'));
+            myChart.setOption({
+                tooltip : {
+                    trigger: 'axis'
+                },
+                title:{
+                    text:'MemoryInfo'
+                },
+                legend: {
+				data : [
+                            'Non-Heap Memory Usage','Heap Memory Usage'
+                        ]
+                    
+                },
+                toolbox: {
+                    show : true,
+                    feature : {
+                        mark : {show: true},
+                        dataView : {show: true, readOnly: false},
+                        magicType : {show: true, type: ['line', 'bar']},
+                        restore : {show: true},
+                        saveAsImage : {show: true}
+                    }
+                },
+                calculable : true,
+                xAxis : [
+                    {
+                        type : 'category',
+                        data:[
+                        'max','committed','init','used'
+                    ]
+                    }
+                ],
+                yAxis : [
+                    {
+                        type : 'value',
+                        splitArea : {show : true}
+                    }
+                ],
+                series : [
+				
+                    { 
+                       itemStyle: {normal: {
+                           label : {show: true}
+                             }},					
+			            name:'Non-Heap Memory Usage',  
+			            type:'line',  
+			            stack:'统计数',  
+			            data: NonHeapary
+						
+			        },{
+                        itemStyle: {normal: {
+                           label : {show: true}
+                             }},					
+			            name:'Heap Memory Usage',  
+			            type:'line',  
+			            stack:'统计数',  
+			            data: Heapary  
+			        }
+                ]
+            });
+        }
+);
+/****** GCcount信息图形 *******/
+require.config({
+    paths:{
+        echarts:'js/echarts/echarts',
+        'echarts/chart/bar' : 'js/echarts/echarts',
+        'echarts/chart/line': 'js/echarts/echarts'
+    }
+});
+require(
+        [
+            'echarts',
+            'echarts/chart/bar',
+            'echarts/chart/line'
+        ],
+        function(ec) {
+            //--- 折柱 ---
+            var myChart = ec.init(document.getElementById('GCcount'));
+            myChart.setOption({
+                tooltip : {
+                    trigger: 'axis'
+                },
+                title:{
+                    text:'GCcount'
+                },
+                legend: {
+				data : [
+                            'CollectionCount',
+                        ]
+                    
+                },
+                toolbox: {
+                    show : true,
+                    feature : {
+                        mark : {show: true},
+                        dataView : {show: true, readOnly: false},
+                        magicType : {show: true, type: ['line', 'bar']},
+                        restore : {show: true},
+                        saveAsImage : {show: true}
+                    }
+                },
+                calculable : true,
+                xAxis : [
+                    {
+                        type : 'category',
+                        data:[
+                        'PS Scavenge','PS MarkSweep'
+                    ]
+                    }
+                ],
+                yAxis : [
+                    {
+                        type : 'value',
+                        splitArea : {show : true}
+                    }
+                ],
+                series : [
+                    { 
+					itemStyle: {normal: {
+                           label : {show: true}
+                             }},
+                        barWidth : 60,					
+			            name:'CollectionCount',  
+			            type:'bar',  
+			            stack:'统计数',  
+			            data: CollectionCount
+						 
+			        }
+                ]
+            });
+        }
+);
+/****** GCtime图形 *******/
+require.config({
+    paths:{
+        echarts:'js/echarts/echarts',
+        'echarts/chart/bar' : 'js/echarts/echarts',
+        'echarts/chart/line': 'js/echarts/echarts'
+    }
+});
+require(
+        [
+            'echarts',
+            'echarts/chart/bar',
+            'echarts/chart/line'
+        ],
+        function(ec) {
+            //--- 折柱 ---
+            var myChart = ec.init(document.getElementById('GCtime'));
+            myChart.setOption({
+                tooltip : {
+                    trigger: 'axis'
+                },
+                title:{
+                    text:'GCtime'
+                },
+                legend: {
+				data : [
+                            'CollectionTime'
+                        ]
+                    
+                },
+                toolbox: {
+                    show : true,
+                    feature : {
+                        mark : {show: true},
+                        dataView : {show: true, readOnly: false},
+                        magicType : {show: true, type: ['line', 'bar']},
+                        restore : {show: true},
+                        saveAsImage : {show: true}
+                    }
+                },
+                calculable : true,
+                xAxis : [
+                    {
+                        type : 'category',
+                        data:[
+                        'PS Scavenge','PS MarkSweep'
+                    ]
+                    }
+                ],
+                yAxis : [
+                    {
+                        type : 'value',
+                        splitArea : {show : true}
+                    }
+                ],
+                series : [
+                    {  
+					     itemStyle: {normal: {
+                           label : {show: true}
+                             }},
+					     barWidth : 60,
+			            name:'CollectionTime',  
+			            type:'bar',  
+			            stack:'统计数',  
+			            data: CollectionTime
+			        }
+                ]
+            });
+        }
+);
+}
+//跳转显示内存各个区域详细信息
+$(document).on("click", "#MemoryPoolInfo", function(e){
+	self.location='MemoryPoolMXBean.html';
+  });
+  
+   });
+</script>
+</head>
+<body style="padding: 10px;width:100%;">
+<div id="MemoryPoolInfo"  style="min-width: 342px; height: 480px; margin: 0 auto"></div>
+<table style="width: 100%;">
+    <tr style="width: 100%;">
+        <th id = "GCcount" style="text-align: center;width: 50%;height:480px;" ></th>
+        <th id = "GCtime" style="text-align: center;width: 50%;height:480px;" ></th>
+    </tr>
+</table>
+<div id="thread"  style="min-width: 342px; height: 480px; margin: 20 auto"></div>
+</body>
+
+</html>

@@ -1,0 +1,3 @@
+ึ๗าณ classTrace
+1 class Trace->mianinfo->allparam->memoryinfo
+2 class Trace->mianinfo->threadDetail

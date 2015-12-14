@@ -1,0 +1,255 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>关键路径分析</title>
+        <link rel="stylesheet"  href="css/lanrenzhijia.css" type="text/css" />
+        <script type='text/javascript' src='js/jquery.min.js'></script>
+        <script type='text/javascript' src='js/lanrenzhijia.js'></script>
+        <script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
+        <script language="javascript" type="text/javascript">
+             $(function() {
+                $(".webwidget_scroller_tab").webwidget_scroller_tab({
+                    scroller_time_interval: '5000',
+                    scroller_window_padding: '10',
+                    scroller_window_width: '1260',
+                    scroller_window_height: '420',
+                    scroller_head_text_color: '#0099FF',
+                    scroller_head_current_text_color: '#666',
+                    directory: 'images'
+                });
+            });
+
+
+//获取地址栏参数串
+function GetQueryString(name) 
+{ 
+     var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)"); 
+     var r = window.parent.document.URL.substr(1).match(reg); 
+     if(r!=null)return  unescape(r[2]); return null; 
+} 
+
+    // var appId = GetQueryString("appId")
+    
+    var appId="85d4a553-ee8d-4136-80ab-2469adcae44d";
+        var criticalPath="AppStart,Main,NewsDetail,null"
+
+        function updateFreqList() {
+            var str = document.getElementById('freq_thre').value.trim();
+            if (str.length == 0) {
+                alert('请输入您要分析的关键路径，页面间以逗号隔开，关键路径至少包含两个以上的页面');
+                document.getElementById('freq_thre').focus();
+                return false;
+            }
+       
+            criticalPath = str
+            console.log(criticalPath)
+            getData(appId, criticalPath)
+
+       }
+
+
+        getData(appId, criticalPath)
+
+        function getData(appId,  criticalPath){
+                    $.get("http://121.199.23.184/PerformanceMonitorCenter/activityRouteAnalysis!loadFunnel?appId="+appId+"&criticalPath="+criticalPath, function(res){
+             var data = JSON.parse(res);
+             // var data={"criticalData":[{"name":"AppStart","value":100},{"name":"Main","value":"100.0"},{"name":"NewsDetail","value":"16.66"},{"name":"null","value":"5.882"}],"legend":["AppStart","Main","NewsDetail","null"]}
+             // var data={criticalData:result.criticalData,legend:result.legend}
+
+            var criticalData=data.criticalData;
+            var legend = data.legend;
+
+   // 路径配置
+    require.config({
+        paths: {
+            echarts: 'http://echarts.baidu.com/build/dist'
+        }
+    });
+
+    // 使用
+    require(
+            [
+                'echarts',
+                'echarts/chart/funnel' // 使用柱状图就加载bar模块，按需加载
+            ],
+            function (ec) {
+                // 基于准备好的dom，初始化echarts图表
+                var myChart = ec.init(document.getElementById('funnel_model'));
+
+                var option = {
+                    title : {
+                        text: '',
+                    },
+                    tooltip : {
+                        trigger: 'item',
+                        formatter: "{a} <br/>{b} : {c}%"
+                    },
+                    toolbox: {
+                        show : true,
+                        feature : {
+                            mark : {show: true},
+                            dataView : {show: true, readOnly: false},
+                            restore : {show: true},
+                            saveAsImage : {show: true}
+                        }
+                    },
+                    legend: {
+                        data : legend
+                    },
+                    calculable : true,
+                    series : [
+                        {
+                            name:'critical path analysis',
+                            type:'funnel',
+                            x: '10%',
+                            y: 60,
+                            //x2: 80,
+                            y2: 60,
+                            width: '80%',
+                            // height: {totalHeight} - y - y2,
+                            min: 0,
+                            max: 100,
+                            minSize: '0%',
+                            maxSize: '100%',
+                            sort : 'descending', // 'ascending', 'descending'
+                            gap : 10,
+                            itemStyle: {
+                                normal: {
+                                    // color: 各异,
+                                    borderColor: '#fff',
+                                    borderWidth: 1,
+                                    label: {
+                                        show: true,
+                                        position: 'inside'
+                                        // textStyle: null      // 默认使用全局文本样式，详见TEXTSTYLE
+                                    },
+                                    labelLine: {
+                                        show: false,
+                                        length: 10,
+                                        lineStyle: {
+                                            // color: 各异,
+                                            width: 1,
+                                            type: 'solid'
+                                        }
+                                    }
+                                },
+                                emphasis: {
+                                    // color: 各异,
+                                    borderColor: 'red',
+                                    borderWidth: 5,
+                                    label: {
+                                        show: true,
+                                        formatter: '{b}:{c}%',
+                                        textStyle:{
+                                            fontSize:20
+                                        }
+                                    },
+                                    labelLine: {
+                                        show: true
+                                    }
+                                }
+                            },
+                            data:criticalData
+                        }
+                    ]
+                };
+
+
+                // 为echarts对象加载数据 
+                myChart.setOption(option);
+            }
+    );
+
+
+
+              // 路径配置
+    require.config({
+        paths: {
+            echarts: 'http://echarts.baidu.com/build/dist'
+        }
+    });
+
+    // 使用
+    require(
+            [
+                'echarts',
+                'echarts/chart/gauge' // 使用柱状图就加载bar模块，按需加载
+            ],
+            function (ec) {
+                // 基于准备好的dom，初始化echarts图表
+                var myChart = ec.init(document.getElementById('conver_rate'));
+
+                var option = {
+                    title : {
+                        text: '',
+                    },
+                    tooltip : {
+                        formatter: "{a} <br/>{b} : {c}%"
+                    },
+                    toolbox: {
+                        show : true,
+                        feature : {
+                            mark : {show: true},
+                            restore : {show: true},
+                            saveAsImage : {show: true}
+                        }
+                    },
+                    series : [
+                        {
+                            name:'关键路径',
+                            type:'gauge',
+                            detail : {formatter:'{value}%'},
+                            data:[{value: criticalData[criticalData.length-1].value, name: criticalData[criticalData.length-1].name}]
+                        }
+                    ]
+                };
+
+
+
+                // 为echarts对象加载数据 
+                myChart.setOption(option);
+            }
+    );
+             });
+        }
+
+
+        </script>
+    </head>
+
+    <body>
+        <div style="height:50px"></div>
+<div class="freq_threshold" align="center">
+
+        <input type="text" id="freq_thre" value="请输入您要分析的关键路径，页面间以逗号隔开，关键路径至少包含两个以上的页面"
+            onfocus="javascript:this.value=''" class="update-txt" style="height:30px;width:800px;" /> <input
+            type="submit" value="分析" id="update_freq" onclick="updateFreqList() "
+            class="update-btn"  style="height:36px;"/>
+    </div>
+    <div style="height:50px"></div>
+        <div class="webwidget_scroller_tab" id="webwidget_scroller_tab" style="margin:0 auto;">
+            <div class="tabContainer">
+                <ul class="tabHead">
+                    <li class="currentBtn"><a href="javascript:;">关键步骤转化率</a></li>
+                    <li><a href="javascript:;">关键路径转化率</a></li>
+                </ul>
+            </div>
+            <div class="tabBody">
+                <ul>
+                    <li class="tabCot">
+                        <div id="funnel_model" style="height:400px;width:1200px;margin-left:auto;margin-right:auto" ></div>
+                    </li>
+                    <li class="tabCot">
+                        <div id="conver_rate" style="height:400px;width:1200px;margin-left:auto;margin-right:auto"></div>
+                    </li>
+                </ul>
+                <div style="clear:both"></div>
+            </div>
+            <div class="modBottom">
+                <span class="modABL">&nbsp;</span><span class="modABR">&nbsp;</span>
+            </div>
+        </div>
+    </body>
+</html>
+

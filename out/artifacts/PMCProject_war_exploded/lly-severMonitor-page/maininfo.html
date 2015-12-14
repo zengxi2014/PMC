@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>demo</title>
+
+<link rel="stylesheet" href="css/bootstrap.css"/>
+
+<style type="text/css">
+body{
+font-family: "Hiragino Sans GB",PingHei,"Helvetica Neue",Helvetica,Arial,Verdana,"Microsoft Yahei",sans-serif;
+font-size :0.8em;
+color: #1b74b5
+font-style: inherit;
+font-variant: inherit;
+font-weight: inherit;
+line-height: inherit;
+}
+table tr th{
+ border-top:solid 1px #e6e6e6
+}
+</style>
+<script src="js/jquery-2.1.4.min.js"></script>
+<script type="text/javascript" src="js/echarts/esl.js"></script>
+
+
+<script type="text/javascript">
+
+var NonHeapary = [];
+var Heapary = []; 
+
+//获取地址栏参数串
+function GetQueryString(name) 
+{ 
+     var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)"); 
+     var r = window.parent.document.URL.substr(1).match(reg); 
+     if(r!=null)return  unescape(r[2]); return null; 
+} 
+
+   // var username = GetQueryString("userName")
+   var username = "luoluyun"
+
+//读取txt文件
+$.post("http://121.199.23.184/PerformanceMonitorCenter/serviceMonitor!loadServiceMonitor",{"userName":username,"className":localStorage["class"]},function(data){
+			
+			var obj =$.parseJSON(data);
+						obj=obj["data"][0];
+			OSinfo(obj);
+						  Compileinfo(obj);
+						  JVMinfo(obj);
+						  Memoryinfo(obj);
+						  Threadinfo(obj);
+			});
+
+			//操作系统信息
+			function OSinfo(obj)
+			{
+			    var $table = $("#OSinfo");
+				var intable;
+				var info=obj["OSInfo"];//alert(info);
+				intable+='<thead><td>系统信息</td><td></td></thead><tr><th>操作系统架构 ：</th><th>'+info["Arch"]
+				+'</th></tr><tr><th style="width:200px;">操作系统名称 ：</th><th>'+info["Name"]
+				+'</th></tr><tr><th style="width:200px;">操作系统版本 ：</th><th>'+info["Version"]
+				+'</th></tr><tr><th style="width:200px;">处理器的数目 ：</th><th>'+info["AvailableProcessors"]+'</th></tr>'
+			    $table.append(intable);
+			}
+			//编译信息
+			function Compileinfo(obj)
+			{
+			    var $table = $("#Compileinfo");
+				var intable;
+				var info=obj["CompilationInfo"];
+				intable+='<thead><td>编译信息</td><td></td></thead><tr><th style="width:200px;">编译器名称 ：</th><th>'+info["Name"]
+				+'</th></tr><tr><th style="width:200px;">编译总时间 ：</th><th>'+info["TotalCompilationTime"]
+				+'</th></tr>'
+			    $table.append(intable);
+			}
+			//虚拟机信息
+			function JVMinfo(obj)
+			{
+			    var $table = $("#JVMinfo");
+				var intable;
+				var info=obj["RuntimeInfo"];
+				intable+='<thead><td>虚拟机信息</td><td></td></thead><tr><th style="width:200px;">Java虚拟机名称 ：</th><th>'+info["Name"]
+				+'</th></tr><tr><th style="width:200px;">Java虚拟机规范名称 ：</th><th>'+info["SpecName"]
+				+'</th></tr><tr><th style="width:200px;">Java虚拟机版本 ：</th><th>'+info["VmVersion"]
+				+'</th></tr><tr><th style="width:200px;">类加载器搜索路径 ：</th><th>'+info["ClassPath"]
+				+'</th></tr><tr><th style="width:200px;">Java库路径 ：</th><th>'+info["LibraryPath"]+'</th></tr>'
+			    $table.append(intable);
+			}
+			//内存信息
+			function Memoryinfo(obj)
+			{
+			    var $table = $("#Memoryinfo");
+				var intable;
+				var info=obj["Sysmen"];
+				intable+='<thead><td>内存信息</td><td></td></thead><tr><th style="width:200px;">空闲内存量 ：</th><th>'+info["freemen"]
+				+'</th></tr><tr><th style="width:200px;">总的内存量 ：</th><th>'+info["totalmen"]
+				+'</th></tr><tr><th style="width:200px;">最大内存量 ：</th><th>'+info["maxmen"]
+				+'</th></tr>'
+			    $table.append(intable);
+			}
+			//线程信息
+			function Threadinfo(obj)
+			{
+			    var $table = $("#Threadinfo");
+				var intable;
+				var info=obj["ThreadInfo"];
+				intable+='<thead><td>线程信息</td><td></td></thead><tr><th style="width:200px;">活动线程的当前数目 ：</th><th>'+info["ThreadCount"]
+				+'</th></tr><tr><th style="width:200px;">活动守护线程的当前数目 ：</th><th>'+info["DaemonThreadCount"]
+				+'</th></tr><tr><th style="width:200px;">峰值活动线程计数 ：</th><th>'+info["PeakThreadCount"]
+				+'</th></tr><tr><th style="width:200px;">当前线程的总 CPU 时间 ：</th><th>'+info["CurrentThreadCpuTime"]
+				+'</th></tr><tr><th style="width:200px;">用户模式中执行的 CPU 时间 ：</th><th>'+info["CurrentThreadUserTime"]+'</th></tr>'
+			    $table.append(intable);
+			}
+
+/****** 统计图形 *******/
+require.config({
+    paths:{
+        echarts:'js/echarts/echarts',
+        'echarts/chart/bar' : 'js/echarts/echarts',
+        'echarts/chart/line': 'js/echarts/echarts'
+    }
+});
+require(
+        [
+            'echarts',
+            'echarts/chart/bar',
+            'echarts/chart/line'
+        ],
+        function(ec) {
+            //--- 折柱 ---
+            var myChart = ec.init(document.getElementById('MemoryPoolInfo'));
+            myChart.setOption({
+                tooltip : {
+                    trigger: 'axis'
+                },
+                title:{
+                    text:'MemoryInfo'
+                },
+                legend: {
+				data : [
+                            'Non-Heap Memory Usage','Heap Memory Usage'
+                        ]
+                    
+                },
+                toolbox: {
+                    show : true,
+                    feature : {
+                        mark : {show: true},
+                        dataView : {show: true, readOnly: false},
+                        magicType : {show: true, type: ['line', 'bar']},
+                        restore : {show: true},
+                        saveAsImage : {show: true}
+                    }
+                },
+                calculable : true,
+                xAxis : [
+                    {
+                        type : 'category',
+                        data:[
+                        'max','committed','init','used'
+                    ]
+                    }
+                ],
+                yAxis : [
+                    {
+                        type : 'value',
+                        splitArea : {show : true}
+                    }
+                ],
+                series : [
+                    {  
+			            name:'Non-Heap Memory Usage',  
+			            type:'line',  
+			            stack:'统计数',  
+			            data: NonHeapary
+			        },{  
+			            name:'Heap Memory Usage',  
+			            type:'line',  
+			            stack:'统计数',  
+			            data: Heapary  
+			        }
+                ]
+            });
+        }
+);
+//跳转显示内存各个区域详细信息
+$(document).on("click", "#Memoryinfo", function(e){
+	//localStorage["class"] = $(this).attr("attr");
+	self.location='AllParam.html';
+  });
+  //跳转显示线程详细信息
+$(document).on("click", "#Threadinfo", function(e){
+	//localStorage["class"] = $(this).attr("attr");
+	self.location='ThreadDetail.html';
+  });
+ 
+</script>
+</head>
+<body style="padding: 10px;color: #1b74b5;text-align:left;">
+<table id="OSinfo" class="table table-hover table table-striped" style="text-align:left;border:solid 3px #e6e6e6">
+<!--<tr>系统信息</tr>
+<tr><th>操作系统架构 ：</th><th></th></tr>
+<tr><th>操作系统名称 ：</th><th></th></tr>
+<tr><th>操作系统版本 ：</th><th></th></tr>
+<tr><th>处理器的数目 ：</th><th></th></tr>-->
+</table>
+
+<table id="Compileinfo" class="table table-hover  table table-striped" style="text-align:left;border:solid 3px #e6e6e6">
+<!--<tr>编译器信息</tr>
+<tr><th>编译器名称 ：</th><th></th></tr>
+<tr><th>编译总时间 ：</th><th></th></tr>-->
+
+</table>
+
+<table id="JVMinfo"  class="table table-hover  table table-striped" style="text-align:left;border:solid 3px #e6e6e6">
+<!--<tr>虚拟机信息</tr>
+<tr><th style="width:200px;">类加载器搜索路径 ：</th><th></th></tr>
+<tr><th>Java库路径 ：</th><th></th></tr>
+<tr><th>Java虚拟机名称 ：</th><th></th></tr>
+<tr><th>Java虚拟机规范名称 ：</th><th></th></tr>-->
+</table>
+
+<table id="Memoryinfo"  class="table table-hover  table table-striped"  style="text-align:left;border:solid 3px #e6e6e6">
+<!--<tr>内存信息</tr>
+<tr><th>空闲内存量 ：</th><th></th></tr>
+<tr><th>总的内存量 ：</th><th></th></tr>
+<tr><th>最大内存量 ：</th><th></th></tr>-->
+</table>
+
+<table id="Threadinfo"  class="table table-hover  table table-striped"  style="text-align:left;border:solid 3px #e6e6e6">
+<!--tr>线程信息</tr>
+<tr><th>活动线程的当前数目 ：</th><th></th></tr>
+<tr><th>活动守护线程的当前数目 ：</th><th></th></tr>
+<tr><th>峰值活动线程计数 ：</th><th></th></tr>
+<tr><th>当前线程的总 CPU 时间 ：</th><th></th></tr>
+<tr><th>用户模式中执行的 CPU 时间 ：</th><th></th></tr>-->
+
+</table>
+
+</body>
+</html>
