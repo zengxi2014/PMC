@@ -4,6 +4,8 @@ import java.text.DecimalFormat;
 
 /**
  * Created by zengxi on 2015/12/8.
+ *
+ * 全局的工具方法
  */
 public class Global {
   //  private static DecimalFormat df3  = new DecimalFormat("###.000");     //用于保留小数点后三位

@@ -14,7 +14,7 @@ public class DataPoint {
         this.dataPointName = dataPointName;
     }
 
-    private Session session;    //样本点的数据值
+    private Session session;    //样本点的数据值，实质上是页面的访问顺序记录
     public Session getSession() {
         return session;
     }

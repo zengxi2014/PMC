@@ -3,7 +3,7 @@ package scut.zengxi.Clustering;
 /**
  * Created by zengxi on 2015/12/1.
  *
- * do dbscan clustering
+ * 第一层聚类，用改进后的dbscan聚类算法：合并簇类的方法中的合并条件中的数据可设置
  *
  */
 
@@ -29,8 +29,9 @@ public class DBScan {
         List<Cluster> clusterList = new ArrayList<Cluster>();
         for (int i = 0; i < dataPoints.size(); i++) {
             DataPoint dp=dataPoints.get(i);
-            //求数据节点的可达节点
+            //求数据节点的可达且核心节点
             List<DataPoint> arrivableObjects=isKeyAndReturnObjects(dp,dataPoints,radius,ObjectNum);
+            //如果核心节点不为空，创建新的簇类并将其可达节点添加进去
             if(arrivableObjects!=null){
                 Cluster tempCluster= new Cluster();
                 tempCluster.setClusterName("Cluster"+i);
@@ -47,9 +48,9 @@ public class DBScan {
 
                     List<DataPoint> dpsA= clusterA.getDataPoints();
                     List<DataPoint> dpsB= clusterB.getDataPoints();
-
+                    //簇类是否合并，如果簇类可以合并，则进行合并
                     boolean flag=mergeList(dpsA,dpsB);
-
+                    //如果簇类可以合并，则将另一个簇类设置为空，因为在mergeList方法中已经将另一个簇类的样本归入前一个簇类
                     if(flag){
                         clusterList.set(j, new Cluster());
                     }
@@ -61,7 +62,7 @@ public class DBScan {
     }
 
     /**
-     * 把类簇集中非空的类簇显示出来
+     * 把类簇集中的类簇显示出来
      * @param stringList
      */
     public void displayCluster(List<List<String>> stringList){
@@ -76,7 +77,7 @@ public class DBScan {
     }
 
     /**
-     * culsterList的每个簇类中的数据是由数据序号构成的，将其转化为由执行该数据序号数据的用户Id
+     * culsterList的每个簇类中的数据是由数据序号构成的，将其转化为由执行该数据序号数据的用户Id，过滤掉空类簇
      * @param clusterList
      * @return  用户ID构成的簇类信息
      */
@@ -111,14 +112,15 @@ public class DBScan {
      * 判断节点是否是关键节点并返回他的可达节点
      * @param dataPoint    需要判断的节点
      * @param dataPoints   样本集
-     * @param radius       相似度阈值
-     * @param objectNum    类簇最小样本数阈值
+     * @param radius       相似度阈值(该参数可以设置，不同的参数值会严重影响聚类结果)
+     * @param objectNum    类簇最小样本数阈值(该参数可以设置，不同的参数值会严重影响聚类结果)
      * @return    如果是关键节点，返回其可达节点，否则返回null
      */
     private List<DataPoint> isKeyAndReturnObjects(DataPoint dataPoint,
                                                   List<DataPoint> dataPoints, double radius, int objectNum) {
 
         List<DataPoint> arrivableObjects= new ArrayList<DataPoint>();
+        //遍历样本集的每个样本，如果它和dataPoint的相似度大于相似度阈值，则为dataPoint的可达节点
         for(DataPoint dp:dataPoints){
             double distance = getDistance(dataPoint, dp);
             if(distance>=radius){
@@ -126,11 +128,12 @@ public class DBScan {
             }
 
         }
-
+        //如果dataPoint的可达节点的数量大于簇类最小样本数阈值，则设置为核心节点
         if(arrivableObjects.size()>=objectNum){
             dataPoint.setKey(true);
             return arrivableObjects;
         }
+        //如果不是核心节点，则返回空
         return null;
     }
 
@@ -169,6 +172,7 @@ public class DBScan {
         for(DataPoint dp:dps2){
             if(dp.isKey()&&isContain(dp, dps1)){
                 count++;
+                //注意，此处的合并条件可以设置
                 if(count> dps1.size()/2&&count>dps2.size()/2){
                     flag=true;
                     break;

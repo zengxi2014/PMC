@@ -37,28 +37,18 @@ public class Similarity {
         sessionBList.add(new Page("P6",3));
         Session sessionB=new Session("2", sessionBList);*/
         double [][]simMatrix = new double[transRecords.size()][transRecords.size()];     //相似度矩阵
+        //用于计算相似度矩阵
         for(int i=0;i<transRecords.size();i++){
             for(int j=0;j<transRecords.size();j++){
                 System.out.println("======"+i+"---"+j+"=======");
                 if(i==j){
                     simMatrix[i][j]=Double.parseDouble(df3.format(0.0));
                 }else{
-
                     simMatrix[i][j]=similarity(transRecords.get(i),transRecords.get(j));
                 }
 
             }
         }
-
-/*        transRecords.get(1).tostring();
-        transRecords.get(0).tostring();
-        similarity(transRecords.get(104),transRecords.get(81));
-        System.out.println();
-        System.out.println("commSeq="+commSeq);
-        System.out.println();*/
-
-
-
     }
 
     /**
@@ -74,9 +64,9 @@ public class Similarity {
         double sim=0.0;         //相似度
 
         double comTimeA=0.0;     //A会话中相似片段的总时间
-        double comTimeB=0.0;
+        double comTimeB=0.0;     //B会话中相似片段的总时间
 
-        List<Page> sessionAList=sessionA.getSessionList();
+        List<Page> sessionAList=sessionA.getSessionList();    //获取会话A的页面访问序列
         List<Page> sessionBList=sessionB.getSessionList();
         String []pageSeqA=getPageSeq(sessionA);
         String []pageSeqB=getPageSeq(sessionB);
@@ -86,10 +76,12 @@ public class Similarity {
         //用于记录相似片段在会话A,B中的每一个页面的位置
         int [] posA= new int[commSeq.size()];
         int [] posB= new int[commSeq.size()];
+        //打印相似片段
         for (int i = 0; i < commSeq.size(); i++) {
             System.out.print(commSeq.get(i)+" ");
         }
         System.out.println();
+        //计算相似片段中的每个页面在A会话序列中的位置
         for(int i=0,j=0;i<sessionAList.size() && j<commSeq.size();){
             if(sessionAList.get(i).getPageName().equals(commSeq.get(j))){
                 posA[j]=i;
@@ -102,7 +94,7 @@ public class Similarity {
             System.out.print(posA[i]+" ");
         }
         System.out.println();
-
+        //计算相似片段中的每个页面在B会话序列中的位置
         for(int i=0,j=0;i<sessionBList.size() && j<commSeq.size();){
             if(sessionBList.get(i).getPageName().equals(commSeq.get(j))){
                 posB[j]=i;
